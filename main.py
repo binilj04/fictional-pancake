@@ -4,12 +4,13 @@ from PIL import Image
 from io import BytesIO
 import json
 import pyrebase
+import threading
 
-url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?1513338229865"
+lock = threading.Lock()
 cookies = ""
 db = ""
 
-
+# the funcion converts the url capcha to text
 def convert(url):
     global cookies
     response = requests.get(url)
@@ -20,9 +21,10 @@ def convert(url):
     bg.paste(img,img)
     # bg.save('colors.jpg')
     text = pytesseract.image_to_string(bg,config="-c tessedit_char_whitelist=0123456789+-= -psm 6")
-    print(text)
+    # print(text)
     return text
 
+# string to math logic
 def decode(number_string):
     if '+' in number_string:
         splitter="+"
@@ -39,26 +41,28 @@ def decode(number_string):
         result=a+b
     else:
         result=a-b
-    print(a,splitter,b,"=",result)
+    # print(a,splitter,b,"=",result)
     return result
 
 
-
-def finalRequest(ans):
+# request with the captcha result to the sever for train list. The request string in the function can be modified to extract different json data fromt he server
+def finalRequest(ans,trainNo):
     global cookies
     # r = requests.get('http://www.indianrail.gov.in/enquiry/SEAT/SeatAvailability.html?locale=en')
     # c = r.cookies
     # i = c.items()
     # for name, value in i:
     #     print(name, value)
-
-    send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+str(ans)+"&trainNo=18189+-+TATA+ALLP+EXP&dt=16-12-2017&sourceStation=TATANAGAR+JN+-+TATA&destinationStation=ALLEPPEY+-+ALLP&classc=SL&quota=GN&inputPage=SEAT&language=en&_=1212395517727"
-    send_req1= "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+str(ans)+"&trainNo=18189+-+TATA+ALLP+EXP&inputPage=TRAIN_SCHEDULE&language=en&_=1513413172999"
+    
+    # send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+str(ans)+"&trainNo=18189+-+TATA+ALLP+EXP&dt=16-12-2017&sourceStation=TATANAGAR+JN+-+TATA&destinationStation=ALLEPPEY+-+ALLP&classc=SL&quota=GN&inputPage=SEAT&language=en&_=1212395517727"
+    send_req= "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+str(ans)+"&trainNo="+ trainNo +"&inputPage=TRAIN_SCHEDULE&language=en&_=1513413172999"
     data= requests.get(send_req,cookies=cookies)
     # print(r2.text)
-    print(json.dumps(data.text, sort_keys=True, indent=4))
+    # print(json.loads(data.text)["trainNumber"])
+    return json.loads(data.text)
 
 
+# initialisation for the firebase. Needs a file data.hd with the config details of the firebase account
 def firebaseinit():
     global db
     config = json.load(open('data.hd'))
@@ -69,8 +73,34 @@ def firebaseinit():
     data = {"name": "Mortimer 'Morty' Smith"}
     db.child("users").child("Morty3").set(data)
 
+
+# writing data to firebase 
+def firebasewrite(data,trainname):
+    global db
+    db.child("Train_del").child(trainname).set(data)
+
+# getting the list of train
+def get_train_list():
+    send_req = "http://www.indianrail.gov.in/enquiry/FetchTrainData?_=1513413172999"
+    data= requests.get(send_req)
+    return data.text
 # while(1):
 #     finalRequest(decode(convert(url)))
 
-finalRequest(decode(convert(url)))
+
+# get the train details especially for day availabilty validity and station list
+def write_train_names():
+    train_list = json.loads(get_train_list())
+    captcha_url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?1513338229865"
+    for train in train_list:        
+        t = threading.Thread(target = firebasewrite, args = (finalRequest(decode(convert(captcha_url)),train.replace(" ","+")),train,))
+        threads.append(t)
+        t.start()
+
+        print(train.replace(" ","+"))
+        
+
+threads = []
 firebaseinit()
+write_train_names()
+print("Finish")
