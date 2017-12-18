@@ -100,7 +100,16 @@ def write_train_names():
         print(train.replace(" ","+"))
         
 
+def get_train_details():
+    all_users = db.child("Train_del").get()
+    for user in all_users.each():
+        print(user.key()) # Morty
+        print(user.val()) # {name": "Mortimer 'Morty' Smith"}
+        break
+
+
 threads = []
 firebaseinit()
-write_train_names()
+# write_train_names()
+get_train_details()
 print("Finish")
