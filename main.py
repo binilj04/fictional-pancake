@@ -6,6 +6,13 @@ import json
 import pyrebase
 import threading
 
+
+
+# The immediate work left:
+# 1) Re-request if request fails for the same train.
+# 2) Strategy for requesting during tatkal to get a  seat availabilty trend
+
+
 lock = threading.Lock()
 cookies = ""
 db = ""
@@ -127,6 +134,6 @@ def get_train_details():
 
 threads = []
 firebaseinit()
-# write_train_names()
-get_train_details()
+#write_train_names()
+# get_train_details()
 print("Finish")
