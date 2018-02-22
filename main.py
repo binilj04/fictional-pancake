@@ -5,6 +5,8 @@ from io import BytesIO
 import json
 import pyrebase
 import threading
+import datetime
+import time
 
 
 
@@ -123,11 +125,74 @@ def get_train_data(train_name):
             end_station=(user_json["stationList"][last_item-1]["stationName"] +" - " + user_json["stationList"][last_item-1]["stationCode"]).replace(" ","+")
             print(start_station)
             print(end_station)
-            # break
+            break
         else:
             db.child("Train_del").child(user.key()).remove()
             print("Removed")
         # print(json.loads(user.val()).serverId)
+
+
+
+# this function gets the train status
+def get_train_status(train_num):
+    global db
+    all_users = db.child("Train_del").get()
+    for user in all_users.each():
+        if train_num not in user.key():
+            continue
+        
+        user_str = json.dumps(user.val())
+        user_json = json.loads(user_str)
+        if "stationList" not in user_str:
+            print("The data in the database does not have station list")
+            exit
+
+        # print(len(user_json["stationList"]))
+        last_item = len(user_json["stationList"])
+        start_station=(user_json["stationList"][0]["stationName"] +" - " + user_json["stationList"][0]["stationCode"]).replace(" ","+")
+        end_station=(user_json["stationList"][last_item-1]["stationName"] +" - " + user_json["stationList"][last_item-1]["stationCode"]).replace(" ","+")
+        trainNo = user.key().replace(" ","+")
+        print(start_station)
+        print(end_station)
+        print(trainNo)
+
+
+        captcha_url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?1513338229865"
+        
+        
+        # data for tomorrow
+        today = datetime.datetime.today()
+        tomorrow = today + datetime.timedelta(1)
+        date_tomorrow = datetime.datetime.strftime(tomorrow,'%d-%m-%Y')
+        f= open("guru99.txt","a")
+
+        global cookies
+        jj = []
+        while (True):
+            # captcha answer  
+            ans = decode(convert(captcha_url))
+            # SL and 3A are the classes
+            send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+\
+            str(ans)+"&trainNo="+ trainNo +"&dt="+ str(date_tomorrow) + "&sourceStation="+\
+            start_station+"&destinationStation="+end_station+"&classc=SL&quota=TQ&inputPage=SEAT&language=en&_=1513413172999"
+            data = requests.get(send_req,cookies=cookies)
+            # print( str(datetime.datetime.today()) +" Query Date:" + json.loads(data.text)["avlDayList"][0]["availablityDate"])
+            # print(json.loads(data.text)["avlDayList"][0]["availablityStatus"]+"\n")
+            print("#", sep=' ', end='', flush=True)
+            jj.append([str(datetime.datetime.today()), json.loads(data.text)["avlDayList"][0]["availablityStatus"]])
+            time.sleep(0.0)
+            f.write(str(datetime.datetime.today())+" , "+ str(json.loads(data.text)["avlDayList"][0]["availablityStatus"])+"\n")
+        print(jj)
+        
+        # data = json.dumps(jj,indent=4)
+        f.close()
+
+
+
+    print("get the train status for the day")
+
+
+
        
 
 
@@ -137,6 +202,11 @@ threads = []
 firebaseinit()
 
 # write_train_names()
-get_train_data("train_name")
+# get_train_data("train_name")
+get_train_status("18189")
 
 print("Finish")
+# For requesting tatkal
+# http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha=734&trainNo=
+# 18189+-+TATA+ALLP+EXP&dt=22-02-2018&sourceStation=TATANAGAR+JN+-+TATA&destinationStation=
+# ALLEPPEY+-+ALLP&classc=SL&quota=TQ&inputPage=SEAT&language=en&_=1519274588661
