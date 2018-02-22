@@ -6,6 +6,13 @@ import json
 import pyrebase
 import threading
 
+
+
+# The immediate work left:
+# 1) Re-request if request fails for the same train.
+# 2) Strategy for requesting during tatkal to get a  seat availabilty trend
+
+
 lock = threading.Lock()
 cookies = ""
 db = ""
@@ -100,6 +107,7 @@ def write_train_names():
         print(train.replace(" ","+"))
         
 
+<<<<<<< HEAD
 def get_train_data(train_name):
     global db
     all_users = db.child("Train_del").get()
@@ -122,10 +130,40 @@ def get_train_data(train_name):
         # print(json.loads(user.val()).serverId)
        
 
+=======
+def get_train_details():
+    global db
+    all_users = db.child("Train_del").get()
+    for user in all_users.each():
+        print(user.key()) # 22117 - PUNE AMI AC SF
+        user_str = json.dumps(user.val())
+        if "stationFrom" in user_str:
+            # extract the data
+            user_json = json.loads(user_str)
+            station_start = user_json["stationList"][0]["stationName"]+" - "+ user_json["stationList"][0]["stationCode"]
+            length = len(user_json["stationList"])
+            station_end = user_json["stationList"][length-1]["stationName"]+" - "+ user_json["stationList"][length-1]["stationCode"]
+            print(station_start)
+            print(station_end)
+            break
+
+        else:
+            #delete the data
+            db.child("Train_del").child(user.key()).remove()
+            print("removed")
+
+        print(user.val()) # {name": "Mortimer 'Morty' Smith"}
+        break
+>>>>>>> 5a9967796fdf8f76696de81f115ac1f0308d09ea
 
 
 threads = []
 firebaseinit()
+<<<<<<< HEAD
 # write_train_names()
 get_train_data("train_name")
+=======
+#write_train_names()
+# get_train_details()
+>>>>>>> 5a9967796fdf8f76696de81f115ac1f0308d09ea
 print("Finish")
