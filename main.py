@@ -100,7 +100,32 @@ def write_train_names():
         print(train.replace(" ","+"))
         
 
+def get_train_data(train_name):
+    global db
+    all_users = db.child("Train_del").get()
+    for user in all_users.each():
+        print(user.key()) # 05817 - APDJ DBB SPECIAL
+        user_str = json.dumps(user.val())
+        user_json = json.loads(user_str)        
+        # print(user_json)
+        if "stationList" in user_str:
+            # print(len(user_json["stationList"]))
+            last_item = len(user_json["stationList"])
+            start_station=(user_json["stationList"][0]["stationName"] +" - " + user_json["stationList"][0]["stationCode"]).replace(" ","+")
+            end_station=(user_json["stationList"][last_item-1]["stationName"] +" - " + user_json["stationList"][last_item-1]["stationCode"]).replace(" ","+")
+            print(start_station)
+            print(end_station)
+            # break
+        else:
+            db.child("Train_del").child(user.key()).remove()
+            print("Removed")
+        # print(json.loads(user.val()).serverId)
+       
+
+
+
 threads = []
 firebaseinit()
-write_train_names()
+# write_train_names()
+get_train_data("train_name")
 print("Finish")
