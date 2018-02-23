@@ -164,11 +164,58 @@ def get_train_status(train_num):
         today = datetime.datetime.today()
         tomorrow = today + datetime.timedelta(1)
         date_tomorrow = datetime.datetime.strftime(tomorrow,'%d-%m-%Y')
-        f= open("guru99.txt","a")
 
+
+
+
+        f= open("guru99.txt","a")
+        start_time = datetime.datetime(2018, 2, 23,10,0,0,0)
+        stop_time = datetime.datetime(2018, 2, 23,10,20,10,0)
+        
+        print("Sleeping")
+        # do not proceed loop
+        while(datetime.datetime.now()< start_time):
+            # print("Sleeping")
+            time.sleep(2)
+        print("Starting.....")
+            
         global cookies
-        jj = []
-        while (True):
+        
+        while (datetime.datetime.now()<= stop_time):
+            # captcha answer  
+            ans = decode(convert(captcha_url))
+            # SL and 3A are the classes
+            send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+\
+            str(ans)+"&trainNo="+ trainNo +"&dt="+ str(date_tomorrow) + "&sourceStation="+\
+            start_station+"&destinationStation="+end_station+"&classc=3A&quota=TQ&inputPage=SEAT&language=en&_=1513413172999"
+            data = requests.get(send_req,cookies=cookies)
+            # print( str(datetime.datetime.today()) +" Query Date:" + json.loads(data.text)["avlDayList"][0]["availablityDate"])
+            # print(json.loads(data.text)["avlDayList"][0]["availablityStatus"]+"\n")
+            print("#", sep=' ', end='', flush=True)
+            # jj.append([str(datetime.datetime.today()), json.loads(data.text)["avlDayList"][0]["availablityStatus"]])
+            time.sleep(1)
+            f.write(str(datetime.datetime.today())+" , "+ str(json.loads(data.text)["avlDayList"][0]["availablityStatus"])+"\n")
+        # print(jj)
+        
+        # data = json.dumps(jj,indent=4)
+        f.close()
+
+        
+        # now this loop is for the sleeper--------------------------------------------
+
+        f= open("guru99_SL.txt","a")
+        start_time = datetime.datetime(2018, 2, 23,11,0,0,0)
+        stop_time = datetime.datetime(2018, 2, 23,11,20,10,0)
+        print("Sleeping")
+        # do not proceed loop
+        while(datetime.datetime.now()< start_time):
+            # print("Sleeping")
+            time.sleep(2)
+        print("Starting.....")
+            
+
+        
+        while (datetime.datetime.now()<= stop_time):
             # captcha answer  
             ans = decode(convert(captcha_url))
             # SL and 3A are the classes
@@ -179,13 +226,17 @@ def get_train_status(train_num):
             # print( str(datetime.datetime.today()) +" Query Date:" + json.loads(data.text)["avlDayList"][0]["availablityDate"])
             # print(json.loads(data.text)["avlDayList"][0]["availablityStatus"]+"\n")
             print("#", sep=' ', end='', flush=True)
-            jj.append([str(datetime.datetime.today()), json.loads(data.text)["avlDayList"][0]["availablityStatus"]])
-            time.sleep(0.0)
+            # jj.append([str(datetime.datetime.today()), json.loads(data.text)["avlDayList"][0]["availablityStatus"]])
+            time.sleep(1)
             f.write(str(datetime.datetime.today())+" , "+ str(json.loads(data.text)["avlDayList"][0]["availablityStatus"])+"\n")
-        print(jj)
+        # print(jj)
         
         # data = json.dumps(jj,indent=4)
         f.close()
+
+
+
+
 
 
 
