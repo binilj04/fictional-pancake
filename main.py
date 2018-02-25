@@ -170,8 +170,8 @@ def get_train_status(train_num):
 
 
         f= open("guru99.txt","a")
-        start_time = datetime.datetime(2018, 2, 25,10,0,0,0)
-        stop_time = datetime.datetime(2018, 2, 25,10,20,10,0)
+        start_time = datetime.datetime(today.year, today.month, today.day,10,0,0,0)
+        stop_time = datetime.datetime(today.year, today.month, today.day,10,20,10,0)
         
         print("Sleeping")
         # do not proceed loop
@@ -207,8 +207,8 @@ def get_train_status(train_num):
         # now this loop is for the sleeper--------------------------------------------
 
         f= open("guru99_SL.txt","a")
-        start_time = datetime.datetime(2018, 2, 25,11,0,0,0)
-        stop_time = datetime.datetime(2018, 2, 25,11,20,10,0)
+        start_time = datetime.datetime(today.year, today.month, today.day,10,0,0,0)
+        stop_time = datetime.datetime(today.year, today.month, today.day,10,20,10,0)
         print("Sleeping")
         # do not proceed loop
         while(datetime.datetime.now()< start_time):
