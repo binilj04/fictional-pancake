@@ -7,6 +7,7 @@ import pyrebase
 import threading
 import datetime
 import time
+from datetime import timezone as tz, datetime as dt
 
 
 
@@ -157,7 +158,7 @@ def get_train_status(train_num):
         print(trainNo)
 
 
-        captcha_url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?1513338229865"
+        
         
         
         # data for tomorrow
@@ -169,8 +170,8 @@ def get_train_status(train_num):
 
 
         f= open("guru99.txt","a")
-        start_time = datetime.datetime(2018, 2, 23,10,0,0,0)
-        stop_time = datetime.datetime(2018, 2, 23,10,20,10,0)
+        start_time = datetime.datetime(2018, 2, 25,10,0,0,0)
+        stop_time = datetime.datetime(2018, 2, 25,10,20,10,0)
         
         print("Sleeping")
         # do not proceed loop
@@ -182,12 +183,14 @@ def get_train_status(train_num):
         global cookies
         
         while (datetime.datetime.now()<= stop_time):
+            cookies=0
+            captcha_url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?" +str(int(dt.now(tz=tz.utc).timestamp() * 1000)) 
             # captcha answer  
             ans = decode(convert(captcha_url))
             # SL and 3A are the classes
             send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+\
             str(ans)+"&trainNo="+ trainNo +"&dt="+ str(date_tomorrow) + "&sourceStation="+\
-            start_station+"&destinationStation="+end_station+"&classc=3A&quota=TQ&inputPage=SEAT&language=en&_=1513413172999"
+            start_station+"&destinationStation="+end_station+"&classc=3A&quota=TQ&inputPage=SEAT&language=en&_="+str(int(dt.now(tz=tz.utc).timestamp() * 1000)) 
             data = requests.get(send_req,cookies=cookies)
             # print( str(datetime.datetime.today()) +" Query Date:" + json.loads(data.text)["avlDayList"][0]["availablityDate"])
             # print(json.loads(data.text)["avlDayList"][0]["availablityStatus"]+"\n")
@@ -204,8 +207,8 @@ def get_train_status(train_num):
         # now this loop is for the sleeper--------------------------------------------
 
         f= open("guru99_SL.txt","a")
-        start_time = datetime.datetime(2018, 2, 23,11,0,0,0)
-        stop_time = datetime.datetime(2018, 2, 23,11,20,10,0)
+        start_time = datetime.datetime(2018, 2, 25,11,0,0,0)
+        stop_time = datetime.datetime(2018, 2, 25,11,20,10,0)
         print("Sleeping")
         # do not proceed loop
         while(datetime.datetime.now()< start_time):
@@ -216,12 +219,14 @@ def get_train_status(train_num):
 
         
         while (datetime.datetime.now()<= stop_time):
+            cookies=0
+            captcha_url = "http://www.indianrail.gov.in/enquiry/captchaDraw.png?" +str(int(dt.now(tz=tz.utc).timestamp() * 1000)) 
             # captcha answer  
             ans = decode(convert(captcha_url))
             # SL and 3A are the classes
             send_req = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?inputCaptcha="+\
             str(ans)+"&trainNo="+ trainNo +"&dt="+ str(date_tomorrow) + "&sourceStation="+\
-            start_station+"&destinationStation="+end_station+"&classc=SL&quota=TQ&inputPage=SEAT&language=en&_=1513413172999"
+            start_station+"&destinationStation="+end_station+"&classc=SL&quota=TQ&inputPage=SEAT&language=en&_="+str(int(dt.now(tz=tz.utc).timestamp() * 1000)) 
             data = requests.get(send_req,cookies=cookies)
             # print( str(datetime.datetime.today()) +" Query Date:" + json.loads(data.text)["avlDayList"][0]["availablityDate"])
             # print(json.loads(data.text)["avlDayList"][0]["availablityStatus"]+"\n")
